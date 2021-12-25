@@ -1,0 +1,9 @@
+# List Managed Nodes Here
+
+
+# Change Variables Here
+[all:vars]
+remote_username=ansible
+remote_password=password
+host_ssh_key_path=/home/sauron/.ssh/id_rsa.pub
+sshd_config_path=config/sshd_config

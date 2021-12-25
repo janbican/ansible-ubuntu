@@ -1,0 +1,25 @@
+---
+- name: Copy SSH Configuration To Disable Remote Root Login And Password Authentication
+  hosts: all
+  remote_user: "{{ remote_username }}"
+  become: yes
+
+  tasks:
+    - name: Backup SSH Configuration
+      ansible.builtin.copy:
+        src: /etc/ssh/sshd_config
+        remote_src: yes
+        dest: /etc/ssh/sshd_config.bak
+
+    - name: Copy Custom SSH Configuration
+      ansible.builtin.copy:
+        src: "{{ sshd_config_path }}"
+        dest: /etc/ssh/sshd_config
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Restart SSH Service
+      ansible.builtin.service:
+        name: sshd
+        state: restarted

@@ -1,0 +1,63 @@
+---
+- name: Install Docker And Docker Compose
+  hosts: all
+  remote_user: "{{ remote_username }}"
+  become: yes
+
+  tasks:
+    - name: Uninstall Old Versions
+      ansible.builtin.apt:
+        name:
+          - docker
+          - docker-engine
+          - docker.io
+          - containerd
+          - runc
+        state: absent
+    
+    - name: Install Packages To Allow APT To Use Repo Over HTTPS
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        update_cache: yes
+        state: present
+
+    - name: Add Docker's Official GPG Key
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Set Up The Stable Docker Repository
+      ansible.builtin.apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Install Docker Engine
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - python3-docker
+        update_cache: yes
+        state: present
+
+    - name: Install Docker Compose
+      ansible.builtin.get_url:
+        url: https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+
+    - name: Create Group Docker
+      ansible.builtin.group:
+        name: docker
+        state: present
+
+    - name: Add User do Docker Group
+      ansible.builtin.user:
+        name: "{{ remote_username }}"
+        groups: docker
+        append: yes
